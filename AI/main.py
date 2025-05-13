@@ -131,9 +131,9 @@ class Main():
 
 		if not self.hit_obstacle: 
 			player_rect_on_grid = player.rect
-			for trap_cell_object in self.trap_cells: 
-				if trap_cell_object.is_trap and trap_cell_object.trap_state == 'red':
-					trap_cell_render_rect = pygame.Rect(trap_cell_object.x * tile - maze.thickness, trap_cell_object.y * tile - maze.thickness, tile, tile)
+			for trap in self.trap_cells: 
+				if trap.is_trap and trap.trap_state == 'red':
+					trap_cell_render_rect = pygame.Rect(trap.x * tile, trap.y * tile, tile, tile)
 					if player_rect_on_grid.colliderect(trap_cell_render_rect):
 						clock.stop_timer()
 						self.hit_obstacle = True # Game over
