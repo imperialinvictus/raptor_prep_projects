@@ -7,6 +7,10 @@ class Cell:
 		self.thickness = thickness
 		self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True}
 		self.visited = False
+		self.is_trap = False
+		self.trap_state = 'original' 
+		self.trap_timer_start = 0  
+		self.trap_state_duration = 0
 
 	# draw grid cell walls
 	def draw(self, sc, tile):

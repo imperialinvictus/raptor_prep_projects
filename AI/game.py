@@ -23,6 +23,10 @@ class Game:
 	def message(self):
 		msg = self.font.render('You Win!!', True, self.message_color)
 		return msg
+	
+	def lose_message(self):
+		msg = self.font.render('You Lose!!', True, self.message_color)
+		return msg
 
 	# checks if player reached the goal point
 	def is_game_over(self, player):
