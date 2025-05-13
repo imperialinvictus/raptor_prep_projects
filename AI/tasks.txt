@@ -1,0 +1,10 @@
+To do: Rafay, Felix, Shaheer
+
+Train an agent (mouse) to navigate a 2D maze to reach cheese while avoiding traps (threats).
+
+
+Add dynamic elements like moving traps to simulate evolving environments
+
+
+Daily 12-05-2024: DONE? (need to see a demo of this)
+my team and I will discuss how to approach the project, I aim to at least generate the grid by today

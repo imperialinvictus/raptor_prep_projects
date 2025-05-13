@@ -1,0 +1,13 @@
+To do: David, Inayah
+Create a simulated drone that:
+Flies over a 2D image map (or simulated terrain).
+
+
+Identifies visual landmarks like ArUco markers or distinctive textures.
+
+
+Estimates its position based on what it "sees".
+
+
+Daily 12-05-2024:
+For computer vision, We will look into methods used for real time image mapping and position estimation in the flight of the drone and also looking at how the simulations are done for the drones when we are given real time data

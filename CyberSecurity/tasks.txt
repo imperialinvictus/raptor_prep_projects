@@ -1,0 +1,17 @@
+To do: Batuhan Hıdıroğlu, Matthew Falcone
+1. Learn about spoofing methods
+    1.a GPS Spoofing: Sending fake GPS signals to the drone so it thinks it's in a different location. This can make it drift off course, land in the wrong place, or crash.
+
+    1.b Command & Control (C2) Spoofing: Imitating the drone’s legitimate ground control station to take over the control link. This requires knowledge of the drone's communication protocol.
+
+    1.c Sensor Spoofing: Feeding false data to onboard sensors like IMUs, cameras, or LiDAR. For example, using lasers to blind cameras or emitters to spoof ultrasonic or infrared rangefinders.
+
+    1.d Wi-Fi/Bluetooth Spoofing: For consumer drones that rely on Wi-Fi/Bluetooth, an attacker can impersonate the controller or interfere with the connection to gain access or deny service.
+
+2. Simulate these in AirSim
+3. Come up with ways to evade them in AirSim and measure success/failure
+
+
+
+Daily 12-05-2024: DONE
+The cybersecurity team will look into and learn about existing methods to disrupt drones by EOD. GPS spoofing, RF jamming and many more methods will be researched.
