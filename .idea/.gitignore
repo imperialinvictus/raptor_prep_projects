@@ -7,7 +7,4 @@
 /dataSources/
 /dataSources.local.xml
 # Python caceh
-**/__pycache__/
-*.pyc
-*.pyo
-*.pyd
+**/__pycache__/*
