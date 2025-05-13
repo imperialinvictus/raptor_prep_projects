@@ -26,6 +26,12 @@ class Main():
 		self.hit_obstacle = False
 		self.trap_cells = []
 
+		# restart functionality
+		self.restart_button_rect = pygame.Rect(600, 400, 100, 40)
+		self.restart_button_color = pygame.Color("cyan")
+		self.restart_button_text = pygame.font.SysFont("impact", 25).render("Restart",
+																			True, pygame.Color("black"))
+
 
 	def instructions(self):
 		instructions1 = self.font.render('Use', True, self.message_color)
@@ -102,114 +108,153 @@ class Main():
 
 
 	# draws all configs; maze, player, instructions, obstacles, and time
-	def _draw(self, maze, tile, player, game, clock):
-		for cell in maze.grid_cells: # Iterate all cells to find traps
+	def _draw(self, tile):
+		for cell in self.maze.grid_cells:
 			if cell.is_trap:
 				cell_rect = pygame.Rect(cell.x * tile, cell.y * tile, tile, tile)
 				if cell.trap_state == 'red':
 					pygame.draw.rect(self.screen, self.TRAP_RED_COLOR, cell_rect)
 
-		# draw maze walls (cell.draw in cell.py only draws walls)
-		[cell.draw(self.screen, tile) for cell in maze.grid_cells]
+		# Draw maze walls
+		[cell.draw(self.screen, tile) for cell in self.maze.grid_cells]
 
-		# add a goal point to reach
-		game.add_goal_point(self.screen)
+		# Draw goal point
+		self.game.add_goal_point(self.screen)
 
-		# draw every player movement
-		player.draw(self.screen)
-		player.update() # Player update now uses the modified logic
+		# Draw and update player
+		self.player.draw(self.screen)
+		self.player.update()
 
+		# Draw and update obstacles
 		for obstacle in self.obstacles:
-			if not self.game_over: # Stop moving obstacles when game ends
+			if not self.game_over:
 				obstacle.move()
-			
 			obstacle.draw(self.screen)
 
-			if obstacle.check_collision(player.rect):
-				clock.stop_timer()
+			# Check collision with obstacle
+			if obstacle.check_collision(self.player.rect):
+				self.clock.stop_timer()
 				self.hit_obstacle = True
 
-		if not self.hit_obstacle: 
-			player_rect_on_grid = player.rect
-			for trap in self.trap_cells: 
+		# Check trap collision
+		if not self.hit_obstacle:
+			player_rect_on_grid = self.player.rect
+			for trap in self.trap_cells:
 				if trap.is_trap and trap.trap_state == 'red':
-					trap_cell_render_rect = pygame.Rect(trap.x * tile, trap.y * tile, tile, tile)
-					if player_rect_on_grid.colliderect(trap_cell_render_rect):
-						clock.stop_timer()
-						self.hit_obstacle = True # Game over
-						break 
-						
-		# instructions, clock, winning message
+					trap_rect = pygame.Rect(trap.x * tile, trap.y * tile, tile, tile)
+					if player_rect_on_grid.colliderect(trap_rect):
+						self.clock.stop_timer()
+						self.hit_obstacle = True
+						break
+
+		# Instructions and win/lose messages
 		self.instructions()
 		if self.game_over:
-			clock.stop_timer()
+			self.clock.stop_timer()
 			if not self.hit_obstacle:
-				self.screen.blit(game.message(),(610,120))
+				self.screen.blit(self.game.message(), (610, 120))
 			else:
-				self.screen.blit(game.lose_message(),(610,120))
+				self.screen.blit(self.game.lose_message(), (610, 120))
 		else:
-			clock.update_timer()
-		self.screen.blit(clock.display_timer(), (625,200))
+			self.clock.update_timer()
 
+		# Timer display
+		self.screen.blit(self.clock.display_timer(), (625, 200))
+
+		# Draw restart button after game over
+		if self.game_over:
+			pygame.draw.rect(self.screen, self.restart_button_color, self.restart_button_rect)
+			self.screen.blit(self.restart_button_text,
+							 (self.restart_button_rect.x + 10, self.restart_button_rect.y + 7))
+
+		# Update entire screen
 		pygame.display.flip()
 
-	# main game loop
-	def main(self, frame_size, tile):
+	def _restart_game(self, frame_size, tile):
 		cols, rows = frame_size[0] // tile, frame_size[-1] // tile
-		maze = Maze(cols, rows)
-		game = Game(maze.grid_cells[-1], tile)
-		player = Player(tile // 3, tile // 3)
-		clock = Clock()
 
-		maze.generate_maze()
-		self._select_and_init_traps(maze, self.NUM_TRAPS, tile)
-		num_obstacles_to_create = 15
-		self.create_obstacles(maze, num_obstacles_to_create, tile)
+		# Reset flags
+		self.game_over = False
+		self.hit_obstacle = False
 
-		clock.start_timer()
+		# Recreate the maze
+		self.maze = Maze(cols, rows)
+		self.maze.generate_maze()
+		self.player = Player(tile // 2, tile // 2)
+		self.clock = Clock()
+		self.game = Game(self.maze.grid_cells[-1], tile)
+		self._select_and_init_traps(self.maze, self.NUM_TRAPS, tile)
+		self.create_obstacles(self.maze, 15, tile)
+		self.clock.start_timer()
+
+
+	def main(self, frame_size, tile):
+
+		cols, rows = frame_size[0] // tile, frame_size[-1] // tile
+		self.maze = Maze(cols, rows)
+		self.maze.generate_maze()
+		self.player = Player(tile // 2, tile // 2)
+		self.clock = Clock()
+		self.game = Game(self.maze.grid_cells[-1], tile)
+
+		self._select_and_init_traps(self.maze, self.NUM_TRAPS, tile)
+		self.create_obstacles(self.maze, 15, tile)
+		self.clock.start_timer()
+
+
 		while self.running:
+
+			self.player.check_move(tile,
+								   self.maze.grid_cells,
+								   self.maze.thickness)
+			# background
 			self.screen.fill("gray")
-			self.screen.fill( pygame.Color("darkslategray"), (603, 0, 752, 752))
-			self._update_traps() 
+			self.screen.fill(pygame.Color("darkslategray"), (603, 0, 752, 752))
+
+			self._update_traps()
+
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					pygame.quit()
+					pygame.quit();
 					sys.exit()
-			
-			# if keys were pressed still
-			if event.type == pygame.KEYDOWN:
-				if not self.game_over:
-					if event.key == pygame.K_LEFT:
-						player.left_pressed = True
-					if event.key == pygame.K_RIGHT:
-						player.right_pressed = True
-					if event.key == pygame.K_UP:
-						player.up_pressed = True
-					if event.key == pygame.K_DOWN:
-						player.down_pressed = True
-					player.check_move(tile, maze.grid_cells, maze.thickness)
-		
-			# if pressed key released
-			if event.type == pygame.KEYUP:
-				if not self.game_over:
-					if event.key == pygame.K_LEFT:
-						player.left_pressed = False
-					if event.key == pygame.K_RIGHT:
-						player.right_pressed = False
-					if event.key == pygame.K_UP:
-						player.up_pressed = False
-					if event.key == pygame.K_DOWN:
-						player.down_pressed = False
-					player.check_move(tile, maze.grid_cells, maze.thickness)
 
-			if game.is_game_over(player) or self.hit_obstacle:
+				# restart
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					if self.game_over and self.restart_button_rect.collidepoint(event.pos):
+						self._restart_game(frame_size, tile)
+
+				# key down
+				if event.type == pygame.KEYDOWN and not self.game_over:
+					if event.key == pygame.K_LEFT:
+						self.player.left_pressed = True
+					if event.key == pygame.K_RIGHT:
+						self.player.right_pressed = True
+					if event.key == pygame.K_UP:
+						self.player.up_pressed = True
+					if event.key == pygame.K_DOWN:
+						self.player.down_pressed = True
+					self.player.check_move(tile, self.maze.grid_cells, self.maze.thickness)
+
+				# key up
+				if event.type == pygame.KEYUP and not self.game_over:
+					if event.key == pygame.K_LEFT:
+						self.player.left_pressed = False
+					if event.key == pygame.K_RIGHT:
+						self.player.right_pressed = False
+					if event.key == pygame.K_UP:
+						self.player.up_pressed = False
+					if event.key == pygame.K_DOWN:
+						self.player.down_pressed = False
+					self.player.check_move(tile, self.maze.grid_cells, self.maze.thickness)
+
+			# win / lose
+			if self.game.is_game_over(self.player) or self.hit_obstacle:
 				self.game_over = True
-				player.left_pressed = False
-				player.right_pressed = False
-				player.up_pressed = False
-				player.down_pressed = False
+				self.player.left_pressed = self.player.right_pressed = \
+					self.player.up_pressed = self.player.down_pressed = False
 
-			self._draw(maze, tile, player, game, clock)
+			# draw everything
+			self._draw(tile)
 			self.FPS.tick(60)
 
 
